@@ -51,7 +51,7 @@ void SpecGrep::SetPath(std::filesystem::path path)
 
 void SpecGrep::outputResultOnConsole()
 {
-    
+    // co.outputResults(numOfFiles, numOfFilesWithPatterns, numOfPatterns, result, log);
     //1. Get number of files searched, number of files with pattern, number of patterns, path to result and log files, number of used threads, elapsed time
     //2. Pass it to OutputConsole and it should print on console results
 }
