@@ -2,6 +2,9 @@
 
 #include <string>
 #include <filesystem>
+#include <fstream>
+#include <vector>
+#include "Files.hpp"
 
 class SpecGrep
 {
@@ -11,6 +14,7 @@ private:
     void SetPath(std::filesystem::path path);
     void outputResultOnConsole();
     void outputResultInFiles();
+    std::vector<Files> filesWithPattern;
     // ConsoleOutput co;
     // FileOutput fo;
 };
