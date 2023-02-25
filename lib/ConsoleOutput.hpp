@@ -6,7 +6,6 @@
 class ConsoleOutput
 {
 public:
-    void outputResults(int filesSearched, int filesWithPattern, int numOfPatterns, std::string resultFile, std::string logFile);
+    void outputResults(int filesSearched, int filesWithPattern, int numOfPatterns, std::string resultFile, std::string logFile, int threads);
 private:
-
 };

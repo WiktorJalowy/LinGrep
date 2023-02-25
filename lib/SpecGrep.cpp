@@ -1,40 +1,66 @@
 #include "SpecGrep.hpp"
 
-void SpecGrep::searchFor(std::string pattern, std::filesystem::path dir = ".", std::string log = "SpecGrep.log", std::string result = "SpecGrep.txt", int threads = 4)
+void SpecGrep::searchFor(std::string pattern, std::string path, std::string log, std::string result, int threads)
 {
+    std::filesystem::path dir = path;
     SetPath(dir);
-    std::fstream file;
+
+    std::ifstream file;
     std::string line;
     int numOfFilesWithPatterns = 0;
     int numOfFiles = 0;
     int numOfPatterns = 0;
+    int numOfHelpPatterns = 0;
+    int lineNum = 0;
+    std::string tempstr;
+    Files patternFound;
+
     for (const auto &dir_entry : std::filesystem::recursive_directory_iterator("."))
     {
-        int lineNum = 0;
+        if(!dir_entry.is_regular_file()) continue;
+        file.open(dir_entry.path());
+        lineNum = 0;
         while(std::getline(file, line))
         {
-            lineNum++;
-            if(line == pattern)
+            if(line.find(pattern) != std::string::npos)
             {
-                Files patternFound;
-                numOfFiles++;
-                numOfFilesWithPatterns++;
                 numOfPatterns++;
-                patternFound.line = lineNum;
+                patternFound.line = lineNum + 1;
                 patternFound.lineWithPattern = line;
-                patternFound.filePath = "PLACEHOLDER";
+                patternFound.filePath = std::filesystem::absolute(dir);
+                tempstr = dir_entry.path();
+                tempstr = tempstr.substr(tempstr.find(".") + 1);
+                patternFound.filePath += tempstr;
                 filesWithPattern.push_back(patternFound);
             }
-            else
-            {
-                numOfFiles++;
-            }
+            lineNum++;
+        }
+        if(numOfHelpPatterns != numOfPatterns) 
+        {
+            numOfHelpPatterns = numOfPatterns;
+            numOfFilesWithPatterns++;
+        }
+        numOfFiles++;
+        file.close();
+    }
+    
+    fo.outputResult(result, getFiles());
+
+    for(int i = 0; i < filesWithPattern.size(); i++)
+    {
+        if(filesWithPattern[i].filePath.find('/') != std::string::npos)
+        {
+            filesWithPattern[i].filePath = filesWithPattern[i].filePath.substr(filesWithPattern[i].filePath.find('/') + 1);
+            i--;
+        }
+        else
+        {
+            continue;
         }
     }
-    //result file i log file poza pętlą
-    //1. searching for pattern in specified or default directory
-    //2. remembering every file in which pattern was found, the number of files with pattern, number of patterns in files, number of line
-    //3. from every file remembered safe line with pattern in which it was found
+
+    //fo.outputLog(log, getFiles());
+    co.outputResults(numOfFiles, numOfFilesWithPatterns, numOfPatterns, result, log, threads);
 }
 
 void SpecGrep::SetPath(std::filesystem::path path)
@@ -43,23 +69,13 @@ void SpecGrep::SetPath(std::filesystem::path path)
     {
         std::filesystem::current_path(path);
     }
-    catch (...)
+    catch(...)
     {
-        throw;
+        std::cerr << "Wrong input please insert a existing path!";
     }
 }
 
-void SpecGrep::outputResultOnConsole()
+std::vector<Files> SpecGrep::getFiles()
 {
-    // co.outputResults(numOfFiles, numOfFilesWithPatterns, numOfPatterns, result, log);
-    //1. Get number of files searched, number of files with pattern, number of patterns, path to result and log files, number of used threads, elapsed time
-    //2. Pass it to OutputConsole and it should print on console results
-}
-
-void SpecGrep::outputResultInFiles()
-{
-    //1. Get each file path, number of line, line content of pattern it was found 
-    //2. Pass it to OutputFile and let it write to file the result and safe as .txt
-    //3. Get for each thread file names in which this thread found pattern
-    //4. Pass it to OutputFile and let it write to file the result and safe as .log
+    return filesWithPattern;
 }
